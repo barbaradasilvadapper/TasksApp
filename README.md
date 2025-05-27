@@ -18,3 +18,6 @@ Tasks App é um aplicativo desenvolvido em Swift que permite aos usuários organ
 - UIKit:  Criação da interface do usuário
 - UserDefaults: Persistência local de dados simples
 - Auto Layout: Adaptação da interface a diferentes tamanhos de tela
+
+
+### Autora: Bárbara Dapper
