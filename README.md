@@ -20,4 +20,4 @@ Tasks App é um aplicativo desenvolvido em Swift que permite aos usuários organ
 - Auto Layout: Adaptação da interface a diferentes tamanhos de tela
 
 
-### Autora: Bárbara Dapper
+*Autora: Bárbara Dapper* 
