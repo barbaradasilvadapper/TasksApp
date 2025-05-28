@@ -24,6 +24,7 @@ class TaskViewController: UIViewController {
         table.delegate = self
         table.register(UITableViewCell.self, forCellReuseIdentifier: "default-cell")
         table.register(TaskTableViewCell.self, forCellReuseIdentifier: TaskTableViewCell.reuseIdentifier)
+        table.register(TitleTableViewHeader.self, forHeaderFooterViewReuseIdentifier: TitleTableViewHeader.reuseIdentifier)
         return table
     }()
     
@@ -60,6 +61,22 @@ class TaskViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         self.tasks = Persintence.getLoggedUser()?.userTaskList
         setup()
+    }
+    
+    
+    var collapedCategories: Set<Int> = []
+    
+    @objc func handleSectionTapped(_ sender: UITapGestureRecognizer) {
+        guard let sectionIndex = sender.view?.tag else { return }
+        
+        if collapedCategories.contains(sectionIndex) {
+            collapedCategories.remove(sectionIndex)
+        }
+        else {
+            collapedCategories.insert(sectionIndex)
+        }
+        
+        tableView.reloadSections(IndexSet(integer: sectionIndex), with: .automatic)
     }
     
     @objc func tappedButton() {
@@ -159,8 +176,24 @@ extension TaskViewController: UITableViewDelegate {
 // MARK: UITableViewDataSource
 extension TaskViewController: UITableViewDataSource {
     
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        sections[section].rawValue.uppercased()
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 44
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        guard let sectionHeaderView = tableView.dequeueReusableHeaderFooterView(withIdentifier: TitleTableViewHeader.reuseIdentifier) as? TitleTableViewHeader
+        else {return nil}
+        
+        let category = sections[section]
+        let isCollapsed = collapedCategories.contains(section)
+        sectionHeaderView.config(category: category, isCollapsed: isCollapsed)
+        
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleSectionTapped(_:)))
+        
+        sectionHeaderView.addGestureRecognizer(tapGestureRecognizer)
+        sectionHeaderView.tag = section
+        sectionHeaderView.isUserInteractionEnabled = true
+        return sectionHeaderView
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -170,7 +203,11 @@ extension TaskViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        rows[section].count
+        if collapedCategories.contains(section) {
+            return 0
+        }
+        
+        return rows[section].count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
